@@ -1,7 +1,7 @@
 // Nicer format for file list
 function renderFileListElement(name) {
 
-  // Het the file extension
+  // Get the file extension
   const re = /(?:\.([^.]+))?$/;
   const ext = re.exec(name)[1];
   let html = ''
@@ -48,7 +48,7 @@ function renderFileListElement(name) {
   return html;
 }
 
-// Simplift notification handling
+// Simplify notification handling
 function notify(message, status) {
     UIkit.notification({
       message: message,

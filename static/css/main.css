@@ -38,7 +38,7 @@ body {
   transition: height 0.3s ease-out;
 }
 #left-col ul.uk-nav-default > li > a {
-  padding: 8px 20px;
+  padding: 5px 10px;
   border-left: 2px solid transparent;
   transition: all 0.15s ease-out;
 }
@@ -46,11 +46,11 @@ body {
   padding: 20px 20px 8px 20px;
 }
 #left-col ul.uk-nav-default li .uk-nav-sub {
-  padding-left: 34px;
+  padding-left: 20px;
 }
 #left-col ul.uk-nav-default > li > a:hover, #left-col ul.uk-nav-default > li.uk-open > a {
-  border-left: 2px solid #39f;
-  padding-left: 30px;
+  border-left: 4px solid #39f;
+  padding-left: 10px;
   color: white;
   background-color: rgba(0, 0, 0, 0.1);
 }
@@ -77,7 +77,7 @@ body {
 /* Left bar links */
 /* Drop arrow */
 .left-content-box {
-  padding: 0.75rem 20px;
+  padding: 0.75rem 20px 0.0em;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
   margin-bottom: -1px;
 }
@@ -98,7 +98,7 @@ body {
 .bar-bottom {
   border-top: 1px solid rgba(255, 255, 255, 0.07);
   padding: 15px 0;
-  background-color: rgba(0, 0, 0, 0.09);
+  background-color: rgba(0, 0, 0, 0.8);
   position: fixed;
   left: 0;
   right: 0;
@@ -128,7 +128,16 @@ body {
 }
 
 .custom-logo {
-  height: 32px;
+  height: 40px;
+}
+
+.uk-position-cover {
+  letter-spacing: 0.3em;
+  font-size: 2.5rem;
+  font-family: "Lucida Console", Monaco, monospace
+}
+.uk-spinner {
+  color: rgb(89, 147, 247);
 }
 
 .profile-img {
@@ -139,6 +148,32 @@ body {
 
 .panel-icons {
   margin: 0 4px;
+}
+
+#tasmota {
+  color: #ffffff;;
+  border-color: #39f;
+  border-width: 2px;
+}
+
+.uk-card-default {
+  background-color: #fff;
+  color: #dadada;
+}
+
+.optimise_vpype {
+  color: #333;;
+  border-width: 2px;
+  background-color: #7e7e7e;
+}
+
+.uk-checkbox:disabled{
+  background-color:#333;
+  border-color:#928f8f
+}
+.uk-input:disabled{
+  background-color:#333;
+  border-color:#928f8f
 }
 
 .uk-tooltip {
@@ -200,7 +235,7 @@ body {
 
 /* Progress */
 .uk-progress {
-  height: 3px;
+  height: 5px;
   margin-bottom: 0.5rem;
   background-color: rgba(0, 0, 0, 0.23);
 }
@@ -315,7 +350,57 @@ body {
   line-height: 0.75rem;
 }
 
+.uk-spinner>*>* {
+	stroke-width: 2 !important;
+}
+
 footer {
   color: #fff;
   font-family: "Lucida Console", Monaco, monospace;
 }
+
+#chart {
+  max-width: 130%; 
+  display: block;
+  height: 120px; 
+  transition: .5s ease;
+  backface-visibility: visible;
+  transform: translate(-6.6%, 0%);
+  
+}
+#logo {
+  opacity: 0.2;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+}
+
+#chartContents {
+  height: 150px; 
+  transition: all 0.5s;
+  opacity: 1;
+  overflow: hidden;
+  padding: 10px 20px 0px 20px;
+}
+
+#chartContents.hidden {
+  height: 0px;
+  opacity: 0;
+}
+
+#actionsContents {
+  height: 100px; 
+  transition: all 0.5s;
+  opacity: 1;
+  overflow: hidden;
+  padding: 0px 0px 0px 0px;  
+}
+
+#actionsContents.hidden {
+  height: 0px;
+  opacity: 0;
+  padding: 0px ;
+}
+

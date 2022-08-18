@@ -10,19 +10,30 @@ from flask_socketio import SocketIO, emit
 import globals
 import send2serial
 import tasmota
+import convert
+
+# import RPi.GPIO as GPIO
+  
 
 # Read Configuration
 config = configparser.ConfigParser()
 config.read('config.ini')
 
 app = Flask(__name__)
-app.config['MAX_CONTENT_LENGTH'] = 20 * 1024 * 1024
+app.config['MAX_CONTENT_LENGTH'] = 200 * 1024 * 1024
 app.config['UPLOAD_EXTENSIONS'] = ['.svg', '.hpgl']
 app.config['UPLOAD_PATH'] = 'uploads'
 app.config['SECRET_KEY'] = '#tiUJ791&jPYI9N7Kj'
 app.config['DEBUG'] = True
 
 socketio = SocketIO(app)
+
+# Buttons setup
+
+# GPIO.setmode(GPIO.BCM) 
+# GPIO.setup(27, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+# GPIO.setup(22, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
 
 def make_tree(path):
     tree = dict(name=os.path.basename(path), content=[])
@@ -39,7 +50,8 @@ def make_tree(path):
                     tree['content'].append(dict(name=name))
     return tree
 
-def plot(file, port, baudrate = '9600', device = '7475a', poweroff = 'off'):
+# def plot(file, port, baudrate = '9600', device = '7475a', poweroff = 'off'):
+def plot(file, port, baudrate = '9600', flowControl = "ctsrts", poweroff = 'off'):
     if file:
         if os.path.exists(file):
 
@@ -49,10 +61,10 @@ def plot(file, port, baudrate = '9600', device = '7475a', poweroff = 'off'):
             # Tasmota - check for on
             if poweroff == 'on':
                 tasmota.tasmota_setStatus(socketio, 'on')
-                time.sleep(2) # Just to be sure, wait 5 seconds
+                time.sleep(2) # Just to be sure, wait 2 seconds
 
             # Start printing
-            send2serial.sendToPlotter(socketio, str(file), str(port), int(baudrate), str(device))
+            send2serial.sendToPlotter(socketio, str(file), str(port), int(baudrate), str(flowControl))
 
             # Tasmota - turn off plotter
             if poweroff == 'on':
@@ -65,53 +77,19 @@ def plot(file, port, baudrate = '9600', device = '7475a', poweroff = 'off'):
     else:
         return socketio.emit('error', {'data': 'Please select a valid file'})
 
-def convert(file, pagesize = 'a4', svgscale = 'a4', pageorientation = 'landscape'):
-    if file:
 
-        filename, file_extension = os.path.splitext(file)
+# ////////////////////////////////////////////////////////////////////////////            
+# Buttons :TODO - something useful with buttons
+def start_button(channel):
+    socketio.emit('status_log', {'data': 'Button 2 was pushed!'})
 
-        outputFile = filename + '_converted_' + pageorientation + '_' + svgscale + '_' + pagesize + '.hpgl'
+def stop_button(channel):
+    socketio.emit('status_log', {'data': 'Button 1 was pushed!'})    
 
-        # Scale svg to desired paper size
-        args = 'vpype';
-        args += ' read "' + os.getcwd() + '/' + str(file) + '"'; #Read input svg
+# GPIO.add_event_detect(27,GPIO.RISING,callback=start_button)
+# GPIO.add_event_detect(22,GPIO.RISING,callback=stop_button)
 
-        if (pageorientation == 'landscape'):
-            if (svgscale == 'a3'):
-                args += ' scaleto 39cm 26.7cm';
-            elif (svgscale == 'a4'):
-                args += ' scaleto 27.7cm 19cm';
-        else:
-            if (svgscale == 'a3'):
-                args += ' scaleto 27.7cm 40cm';
-            elif (svgscale == 'a4'):
-                args += ' scaleto 19cm 27.7cm';
 
-        args += ' write --device hp7475a';
-
-        args += ' --page-size ' + str(pagesize);
-
-        if (pageorientation == 'landscape'):
-            args += ' --landscape';
-
-        args += ' --center';
-        args += ' "' + os.getcwd() + '/' + str(outputFile) + '"'
-
-        rendering = subprocess.Popen(args, shell=True)
-        rendering.wait() # Hold on till process is finished
-
-        # Delete file
-        if os.path.exists(file):
-            os.remove(file)
-            socketio.emit('status_log', {'data': 'Deleted SVG: ' + str(file)})
-        else:
-            socketio.emit('error', {'data': 'The file does not exist'})
-
-        return '- Exported ' + str(outputFile)
-
-@app.errorhandler(413)
-def too_large(e):
-    return "File is too large", 413
 
 @app.route('/')
 def index():
@@ -126,6 +104,7 @@ def index():
         'plotter_port': config['plotter']['port'],
         'plotter_device': config['plotter']['device'],
         'plotter_baudrate': config['plotter']['baudrate'],
+        'plotter_flowControl': config['plotter']['flowControl']
     }
 
     return render_template('index.html', files=files, configuration=configuration)
@@ -142,6 +121,11 @@ def upload_files():
         uploaded_file.save(os.path.join(app.config['UPLOAD_PATH'], filename))
     return '', 204
 
+@app.errorhandler(413)
+def too_large(e):
+    socketio.emit('error', {'data': 'File is too large (max 200MB)'})
+    return "File is too large (Max 200MB)", 413
+
 @app.route('/uploads/<filename>')
 def upload(filename):
     return send_from_directory(app.config['UPLOAD_PATH'], filename)
@@ -157,6 +141,15 @@ def update_files():
 def update_ports():
     ports = send2serial.listComPorts()
     return ports
+
+#auto detect baud
+@app.route('/update_baud', methods=['GET','POST'])
+def update_baud():
+
+    if request.method == "POST":
+        port = request.form.get('selected_port')
+        baudrate = send2serial.getBaudRate(port)
+        return str(baudrate)
 
 # Delete uploaded filed
 @app.route('/delete_file', methods=['GET', 'POST'])
@@ -181,32 +174,24 @@ def start_plot():
         file = app.config['UPLOAD_PATH'] + '/' + request.form.get('file')
         port = request.form.get('port')
         baudrate = request.form.get('baudrate')
+        flowControl = request.form.get('flowControl')
         tasmota = request.form.get('tasmota')
-        device = request.form.get('device')
 
-        plot(file, port, baudrate, device, tasmota)
+        plot(file, port, baudrate, flowControl, tasmota)
 
-        return 'Plotter Started'
+        return 'Plot started'
 
 # Stop the printing process
 @app.route('/stop_plot', methods=['GET', 'POST'])
 def stop_plot():
     if request.method == "GET":
         globals.printing = False
-        return 'Plotter Stopped'
+        return 'Plot stopped'
 
 # Start converting file using vpype
 @app.route('/start_conversion', methods=['GET', 'POST'])
 def start_conversion():
-    if request.method == "POST":
-        file = app.config['UPLOAD_PATH'] + '/' + request.form.get('file')
-        pagesize = request.form.get('pagesize')
-        svgscale = request.form.get('svgscale')
-        pageorientation = request.form.get('pageorientation')
-
-        output = convert(file, pagesize, svgscale, pageorientation)
-
-        return output
+   return  convert.start_conversion()
 
 # Start reboot sequence
 @app.route('/action_reboot', methods=['GET', 'POST'])
@@ -250,12 +235,10 @@ def save_configfile():
             config['telegram']['telegram_token'] = request.form.get('telegram_token')
         if "telegram_chatid" in request.form:
             config['telegram']['telegram_chatid'] = request.form.get('telegram_chatid')
-
         if "tasmota_enable" in request.form:
             config['tasmota']['tasmota_enable'] = request.form.get('tasmota_enable')
         if "tasmota_ip" in request.form:
             config['tasmota']['tasmota_ip'] = request.form.get('tasmota_ip')
-
         if "plotter_name" in request.form:
             config['plotter']['name'] = request.form.get('plotter_name')
         if "plotter_port" in request.form:
@@ -264,6 +247,8 @@ def save_configfile():
             config['plotter']['device'] = request.form.get('plotter_device')
         if "plotter_baudrate" in request.form:
             config['plotter']['baudrate'] = request.form.get('plotter_baudrate')
+        if "plotter_flowControl" in request.form:
+            config['plotter']['flowControl'] = request.form.get('plotter_flowControl')
 
         with open('config.ini', 'w') as configfile:
             config.write(configfile)
@@ -281,6 +266,7 @@ def save_configfile():
             'plotter_port': config['plotter']['port'],
             'plotter_device': config['plotter']['device'],
             'plotter_baudrate': config['plotter']['baudrate'],
+            'plotter_flowControl': config['plotter']['flowControl']
         }
         return output
 
@@ -295,4 +281,6 @@ if __name__ == "__main__":
     globals.initialize()
 
     # app.run(host='127.0.0.1',port=5000,debug=True,threaded=True)
-    socketio.run(app, host='0.0.0.0', port=5000, debug=True)
+    socketio.run(app, host='0.0.0.0', port=5000, debug=True, allow_unsafe_werkzeug=True)
+
+    # socketio.run(app, host='0.0.0.0', port=5000, debug=True)

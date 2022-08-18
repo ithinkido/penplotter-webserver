@@ -1,0 +1,50 @@
+name: Run install scrpit
+
+on:
+  workflow_dispatch:
+  push:
+   branches:    
+      - 'PiPlot'
+
+jobs:
+  Install_script_test:    
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          path: './'
+      - run: |  
+          # Test first install  
+          dir="$HOME/webplotter_test"
+          git clone -q https://github.com/ithinkido/penplotter-webserver.git "$dir" > /dev/null  
+          sed 's/sudo reboot/vpype --version/' $dir/install.sh > testinstall.sh
+          chmod +x testinstall.sh
+          ./testinstall.sh
+
+      - run: |
+          # Get test file 
+          sudo wget -q -P uploads/ https://cdn.discordapp.com/attachments/903199465714888714/903214522700013628/columbia_A4.svg
+          cp config.ini.sample config.ini          
+         
+      - run: |   
+          # Test exsiting install
+          ./testinstall.sh
+ 
+      # - uses: cypress-io/github-action@v2
+      #   with:
+      #     start: python3 main.py, systemctl list-units --type=service --state=running ''
+      #     wait-on: http://localhost:5000
+      #     wait-on-timeout: 5
+      #     config-file: cypress.json
+          
+      # - uses: actions/upload-artifact@v1
+      #   if: always()
+      #   with:
+      #     name: cypress-videos
+      #     path: ./cypress/videos 
+
+      # - uses: actions/upload-artifact@v1
+      #   if: always()
+      #   with:
+      #     name: cypress-screenshot
+      #     path: ./cypress/screenshots/webplot_test.spec.js/

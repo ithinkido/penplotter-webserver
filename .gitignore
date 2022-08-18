@@ -3,3 +3,9 @@ __pycache__/*
 node_modules/*
 config.ini
 test/*
+cypress/fixtures/example.json
+cypress/plugins/index.js
+cypress/support/commands.js
+cypress/support/index.js
+vpype/*
+*.ucomp

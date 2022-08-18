@@ -8,6 +8,7 @@ tasmota_ip = 192.168.1.107
 
 [plotter]
 name = HP 7475A
-port = COM1
-device = 7475a
+port = /dev/ttyAMA0
+device = hp7475a
 baudrate = 9600
+flowControl = CTS/RTS
