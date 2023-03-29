@@ -15,9 +15,26 @@ spinner()
     printf "    \b\b\b\b"
 }
 printf "\033[?25l"
-#get the curret debian version info
 lsb_release -ds
 python -V
+
+if ! command -v python3 &>/dev/null; then
+    echo "Python 3 is not installed."
+    return 1
+else
+    if [[ $(python3 -c 'import sys; print(sys.version_info >= (3, 9, 2))') == False ]]; then
+        echo "Python version 3.9.2 or newer is required."
+        return 1
+    fi
+fi
+
+#get the curret debian version info
+piversion=$(grep VERSION_ID /etc/os-release | cut -d '"' -f 2)
+if [[ "$piversion" -lt 11 ]]; then
+    echo "PiOS (Bullseys) 11 or newer is required."
+    return 1
+fi
+
 echo ""
 echo "Updating apt. This will take a while..."
 (sudo apt-get update -qq) & spinner
@@ -31,7 +48,9 @@ if [ ! -d "$dir" ] ; then
     wait
     echo ""
     echo "Downloading Web Plotter from Github"
-    git clone -q -b PiPlot https://github.com/ithinkido/penplotter-webserver.git "$dir" > /dev/null
+    git clone -q -b graphtec https://github.com/ithinkido/penplotter-webserver.git "$dir" > /dev/null
+    # git clone -q -b PiPlot https://github.com/ithinkido/penplotter-webserver.git "$dir" > /dev/null
+    
     echo ""
     echo "Installing pip packages"
     (python3 -m pip install -r $dir/requirements.txt -qq) & spinner 
@@ -50,6 +69,13 @@ if [ ! -d "$dir" ] ; then
     sudo systemctl daemon-reload 
     sudo systemctl enable webplotter 
     sudo systemctl start webplotter 
+    sleep 2
+    if sudo systemctl is-active --quiet webplotter; then
+        echo "Web plotter has started successfully"
+    else
+        echo "Something has gone wrong...."
+        exit
+    fi
     printf "\033[?25h"
     printf "Rebooting in 5 sec "
     (for i in $(seq 4 -1 1); do
@@ -71,7 +97,9 @@ else
     mv $dir/uploads/ temp/uploads/
     mv $dir/config.ini temp/config.ini
     rm -rf "$dir"
-    git clone -q -b PiPlot https://github.com/ithinkido/penplotter-webserver.git "$dir" > /dev/null 
+    git clone -q -b graphtec https://github.com/ithinkido/penplotter-webserver.git "$dir" > /dev/null 
+    # git clone -q -b PiPlot https://github.com/ithinkido/penplotter-webserver.git "$dir" > /dev/null
+
     # add user files back
     rm -R $dir/uploads
     mv temp/* $dir/
@@ -81,5 +109,10 @@ else
     echo ""
     python3 -m pipx upgrade vpype
     sudo systemctl restart webplotter
+    if sudo systemctl is-active --quiet webplotter; then
+        echo "Web plotter has started successfully"
+    else
+        echo "Something has gone wrong...."
+    fi
     printf "\033[?25h"
 fi
