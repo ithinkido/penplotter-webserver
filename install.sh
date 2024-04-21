@@ -239,6 +239,7 @@ else
     # python3 -m pip install -q --upgrade -r $dir/requirements.txt
     python3 -m pip install --upgrade pip_system_certs -q 
     python3 -m pip install --upgrade -r $dir/requirements.txt > /dev/null
+    python3 -m pip install --upgrade vpype --prefer-binary vpype -q
     sudo rm -rf /etc/systemd/system/webplotter.service
 
     current_user=$(whoami)
