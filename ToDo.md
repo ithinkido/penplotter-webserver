@@ -1,0 +1,16 @@
+- [x] File Upload
+  - [x] Also file management? Add, Delete
+- [x] File Conversion
+- [x] Print interface
+  - [x] Setting print params
+  - [x] List com ports
+  - [x] Set file
+- [x] Fix vpype conversion isse when running as a service
+- [x] Autoscroll console
+- [x] Remote pi shutdown
+- [x] Add tasmota control in sidebar
+- [x] Update config.ini via web interface
+- [x] Disable file deletion while printing
+
+- [ ] Stop print via UI?
+- [ ] List current printing filename

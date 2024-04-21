@@ -1,0 +1,20 @@
+[telegram]
+telegram_token = XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+telegram_chatid = XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+[tasmota]
+tasmota_enable = false
+tasmota_ip = 192.168.1.101
+
+[timelapse]
+timelapse_enable = false
+timelapse_auto_start = true
+timelapse_preview = false
+
+[plotter]
+name = My Plotter
+port = /dev/ttyAMA0
+device = hp7475a
+baudrate = 9600
+flowcontrol = CTS/RTS
+
