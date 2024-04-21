@@ -1,0 +1,84 @@
+name: Run install scrpit
+
+on:
+  workflow_dispatch:
+  push:
+   branches:    
+      - 'PiPlot'
+
+jobs:
+  Test_Pi_Install:
+    runs-on: ubuntu-latest
+    continue-on-error: true 
+
+    strategy:
+      matrix:
+        board_name: [Zero_W, Zero_2W, Zero_2W_64bit]
+        include:
+        - board_name : Zero_W
+          arch: armv6l
+          cpu: arm1176
+          cpu_info: cpuinfo/raspberrypi_zero_w
+          base_image: raspios_lite:latest
+          
+        - board_name : Zero_2W
+          arch: armv7l
+          cpu: cortex-a7
+          cpu_info: cpuinfo/raspberrypi_zero2_w
+          base_image: raspios_lite:latest
+          
+        - board_name : Zero_2W_64bit 
+          arch: aarch64
+          cpu: cortex-a53
+          cpu_info: cpuinfo/raspberrypi_zero2_w_arm64
+          base_image: raspios_lite_arm64:latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: pguyot/arm-runner-action@HEAD
+       
+      with:
+        base_image: ${{ matrix.base_image }}
+        cpu: ${{ matrix.cpu }}
+        image_additional_mb: 2048
+        optimize_image: false
+        
+        # user: pi
+        
+        commands: |
+            echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+            ls -l /etc/apt/
+            sudo apt-get install -qq -y git python3-numpy > /dev/null
+
+            # Test first install  
+            dir="$HOME/webplotter_test"
+            git clone -q https://github.com/ithinkido/penplotter-webserver.git "$dir" > /dev/null  
+            sed 's/sudo reboot/$HOME\/penplotter_venv\/bin\/python3 $HOME\/webplotter\/main.py \&\nsleep 10\npkill -f "$HOME\/penplotter_venv\/bin\/python3 $HOME\/webplotter\/main.py"/' install.sh > testinstall.sh
+            sed -i 's/-q //' testinstall.sh
+            chmod +x testinstall.sh
+            ./testinstall.sh
+
+            # Get test file 
+            sudo wget -q -P uploads/ https://raw.githubusercontent.com/ithinkido/PiPlot/main/images/columbia_A4.svg
+            # cp config.ini.sample config.ini          
+
+            # Test exsiting install
+            ./testinstall.sh
+ 
+      # - uses: cypress-io/github-action@v2
+      #   with:
+      #     start: python3 main.py, systemctl list-units --type=service --state=running ''
+      #     wait-on: http://localhost:5000
+      #     wait-on-timeout: 5
+      #     config-file: cypress.json
+          
+      # - uses: actions/upload-artifact@v1
+      #   if: always()
+      #   with:
+      #     name: cypress-videos
+      #     path: ./cypress/videos 
+
+      # - uses: actions/upload-artifact@v1
+      #   if: always()
+      #   with:
+      #     name: cypress-screenshot
+      #     path: ./cypress/screenshots/webplot_test.spec.js/
