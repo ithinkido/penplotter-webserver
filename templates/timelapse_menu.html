@@ -1,0 +1,58 @@
+<div class="uk-modal-dialog uk-card uk-card-default uk-card-small mac-card">
+  <div class="uk-card-header mac-browser-bar">
+    <div class="uk-grid uk-grid-small">
+      <div class="uk-width-auto">
+        <h4>Setup timelapse</h4>
+      </div>
+      <div class="uk-width-expand uk-text-right panel-icons">
+        <a class="uk-icon-link mac-button mac-close uk-modal-close" title="Close" data-uk-tooltip
+          data-uk-icon="icon: close"></a>
+      </div>
+    </div>
+  </div>
+  <div class="uk-modal-body">
+    <form id="timelapseSetup">
+      <fieldset class="uk-fieldset uk-grid-small" uk-grid>
+        <div class="uk-width-1-2@s">
+          <label class="uk-form-label" for="timelapse_enable">Enable Timelapse</label>
+          <div class="uk-margin-small">
+            <select id="timelapse_enable" class="uk-select" name="timelapse_enable">
+              <option value="true">True</option>
+              <option value="false">False</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="uk-width-1-2@s">
+          <label class="uk-form-label" for="enable_prewiew">Enable Timelapse Preview</label>
+          <div class="uk-margin-small">
+            <select id="enable_prewiew" class="uk-select" name="enable_prewiew">
+              <option value="true">True</option>
+              <option value="false">False</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="uk-width-1-2@s">
+          <label class="uk-form-label" for="timelapse_auto_start">Timelapse Auto Start</label>
+          <div class="uk-margin-small">
+            <select id="timelapse_auto_start" class="uk-select" name="timelapse_auto_start">
+              <option value="true">True</option>
+              <option value="false">False</option>
+            </select>
+          </div>
+        </div>
+
+      </fieldset>
+      <!-- FIX THIS - there should be a space between the options and the save button. The solution below is a hack -->
+      <div>
+        <br>
+      </div>
+      
+      <div class="uk-text-right uk-margin-small-top">
+        <button class="uk-button uk-button-primary uk-width-1-1 saveConfig" type="button">Save Configuration
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
