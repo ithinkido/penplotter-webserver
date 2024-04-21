@@ -111,7 +111,7 @@ if [ ! -d "$dir" ] ; then
 
     while IFS= read -r package; do
         echo "Installing $package" && \
-        if (python3 -m pip install -q "$package" > /dev/null) & spinner; then
+        if (python3 -m pip install "$package" > /dev/null) & spinner; then
             echo -e "\e[32m $package was installed successfully.\e[0m"
         else
             echo -e "\e[31m Failed to install $package.\e[0m"
@@ -121,7 +121,7 @@ if [ ! -d "$dir" ] ; then
     done < "$dir/requirements.txt"
 
     echo "Installing vpype"
-    if (python3 -m pip install vpype --prefer-binary vpype -q > /dev/null) & spinner; then
+    if (python3 -m pip install vpype --prefer-binary vpype > /dev/null) & spinner; then
         echo -e "\e[32m vpype was installed successfully.\e[0m"
     else
         echo -e "\e[31m Failed to install vpype.\e[0m"
@@ -237,9 +237,9 @@ else
     echo ""
 
     # python3 -m pip install -q --upgrade -r $dir/requirements.txt
-    python3 -m pip install --upgrade pip_system_certs -q 
+    python3 -m pip install --upgrade pip_system_certs >/dev/null
     python3 -m pip install --upgrade -r $dir/requirements.txt > /dev/null
-    python3 -m pip install --upgrade vpype --prefer-binary vpype -q
+    python3 -m pip install --upgrade vpype --prefer-binary vpype > /dev/null
     sudo rm -rf /etc/systemd/system/webplotter.service
 
     current_user=$(whoami)
