@@ -55,13 +55,22 @@ jobs:
             sed 's/sudo reboot/$HOME\/penplotter_venv\/bin\/python3 $HOME\/webplotter\/main.py \&\nsleep 10\npkill -f "$HOME\/penplotter_venv\/bin\/python3 $HOME\/webplotter\/main.py"/' install.sh > testinstall.sh
             sed -i 's/-q //' testinstall.sh
             chmod +x testinstall.sh
+            echo ""
+            echo ""
+            cat testinstall.sh
+            echo ""
+            echo ""           
+            echo -e "\e[32m Test first Install.\e[0m"
             ./testinstall.sh
 
             # Get test file 
+            echo -e "\e[32m Get File \e[0m"
+
             sudo wget -q -P uploads/ https://raw.githubusercontent.com/ithinkido/PiPlot/main/images/columbia_A4.svg
             # cp config.ini.sample config.ini          
 
             # Test exsiting install
+            echo -e "\e[32m Test exsiting Install.\e[0m"
             ./testinstall.sh
  
       # - uses: cypress-io/github-action@v2
