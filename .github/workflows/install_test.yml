@@ -47,7 +47,7 @@ jobs:
         commands: |
             echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
             ls -l /etc/apt/
-            sudo apt-get install -qq -y git python3-numpy > /dev/null
+            sudo apt-get install -qq -y git > /dev/null
 
             # Test first install  
             dir="$HOME/webplotter_test"
