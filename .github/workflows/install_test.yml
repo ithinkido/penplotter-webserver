@@ -47,17 +47,17 @@ jobs:
         commands: |
             echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
             ls -l /etc/apt/
-            sudo apt-get install -qq -y git > /dev/null
+            sudo apt update && apt-get install -qq -y git > /dev/null
 
             # Test first install  
             dir="$HOME/webplotter_test"
-            git clone -q https://github.com/ithinkido/penplotter-webserver.git "$dir" > /dev/null  
+            git clone -q https://github.com/ithinkido/penplotter-webserver.git "$dir" && > /dev/null  
             sed 's/sudo reboot/$HOME\/penplotter_venv\/bin\/python3 $HOME\/webplotter\/main.py \&\nsleep 10\npkill -f "$HOME\/penplotter_venv\/bin\/python3 $HOME\/webplotter\/main.py"/' install.sh > testinstall.sh
             sed -i 's/-q //' testinstall.sh
             chmod +x testinstall.sh
             echo ""
             echo ""
-            cat testinstall.sh
+            cat testinstall.sh &&
             echo ""
             echo ""           
             echo -e "\e[32m Test first Install.\e[0m"
