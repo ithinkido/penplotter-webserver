@@ -21,6 +21,7 @@ function updatePorts() {
     .then(function () { });
 }
 
+
 // Auto detect Baudrate
 function updateBaud() {
   // load spinner icon while the pi check for baudrate
@@ -78,6 +79,29 @@ function updateFiles() {
     })
     .then(function () { });
 }
+
+// Update plot status
+function plot_status() {
+  axios
+    .get("/plot_status")
+    .then(function (response) {
+      if (response.status == 200) {
+        var ps = response.data.plot_status;
+        if (ps == "Plotting"){
+          jQuery(".stopPlot").removeClass("uk-hidden");
+        }
+        else {
+          jQuery(".stopPlot").addClass("uk-hidden");
+        }
+      }
+    })
+    .catch(function (error) {
+      notify(error, "no status");
+      console.error(error);
+    })
+    .then(function () { });
+}
+
 
 // Handle file selection
 function selectFile(element) {

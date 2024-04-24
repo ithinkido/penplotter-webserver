@@ -66,9 +66,9 @@
         <span class="uk-text-small uk-text-muted">Selected File: <span id="selectedFilename"
             class="uk-text-success selectedFilename"></span></span>
       </div>
-      <ul class="uk-nav uk-nav-default uk-nav-parent-icon unlock-edit uk-hidden" data-uk-nav>
-        <li><a class="uk-button-danger stopPlot"><span data-uk-icon="icon: close"
-              class="uk-margin-small-right"></span>Stop Print</a></li>
+      <ul class="uk-nav uk-nav-default uk-nav-parent-icon " data-uk-nav>
+        <li><a class="uk-button-danger uk-hidden stopPlot"><span data-uk-icon="icon: close"
+              class="uk-margin-small-right"></span>Stop plot</a></li>
       </ul>
     </div>
 
@@ -428,6 +428,18 @@
         socket.emit('connection', {
           data: 'Client connected!'
         });
+        socket.emit('plot_status', {
+        });
+      });
+
+      socket.on('plotter_status', function (data) {
+        console.log('WS_Plotter Status: ', data.status);
+        if (data.status == "Plotting"){
+          jQuery(".stopPlot").removeClass("uk-hidden");
+        }
+        else {
+          jQuery(".stopPlot").addClass("uk-hidden");
+        }
       });
 
       // Set log window
@@ -481,9 +493,11 @@
       // Lock file deletion on print start, unlock on stop
       socket.on('lock_edit', function (msg, cb) {
         if (msg.data == 'on') {
+          console.log("###lock edit ON")
           jQuery('.lock-edit').prop('disabled', true).addClass('uk-hidden');
           jQuery('.unlock-edit').prop('disabled', false).removeClass('uk-hidden');
         } else {
+          console.log("###lock edit OFF")
           jQuery('.lock-edit').prop('disabled', false).removeClass('uk-hidden');
           jQuery('.unlock-edit').prop('disabled', true).addClass('uk-hidden');
         }
@@ -492,6 +506,7 @@
       // Populate list on first start
       updateFiles();
       updatePorts();
+      plot_status();
 
       // Fetch configuration data
       updateConfiguration();
@@ -615,7 +630,6 @@
       jQuery(document).on('click', '.stopPlot', function (e) {
         e.preventDefault();
         stopPlot();
-        jQuery('#chartContents').addClass('hidden');
       });
 
       // Hide Cards
