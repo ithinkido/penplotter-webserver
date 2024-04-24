@@ -111,22 +111,16 @@ def stop_button(channel):
 # GPIO.add_event_detect(27,GPIO.RISING,callback=start_button)
 # GPIO.add_event_detect(22,GPIO.RISING,callback=stop_button)
 
-
-
-
-
-
-
 # On connection
 @socketio.on('connection')
 def handle_connection(message):
     print("Client connected")
 
 
-
 @app.errorhandler(413)
 def too_large(e):
     return "File is too large", 413
+
 
 @app.route('/')
 def index():
@@ -180,8 +174,8 @@ def html(filename):
         return "File not found", 404
     
 def plot_status():
-    print("P#### SocketIO lotter status = " + globals.plotter_status)
-    socketio.emit('plot_status', {'status': globals.plotter_status})    
+    print("WS_Plotter status = " + globals.plotter_status +" , File = " + globals.current_file)
+    socketio.emit('plot_status', {'status': globals.plotter_status,'file': globals.current_file}) 
 
 # WebSocket plot_status
 @socketio.on('ws_plot_status')
@@ -192,7 +186,17 @@ def ws_plot_status():
 @app.route('/plot_status', methods=['GET'])
 def get_plot_status():
     plot_status()
-    return '{"plot_status": "' + globals.plotter_status + '"}'
+    return '{"plot_status": "' + globals.plotter_status + '", "current_file": "' + globals.current_file + '"}'
+
+# Set Selected File
+@app.route('/selected_file', methods=['POST'])
+def set_selected_file():
+    data = request.get_json(silent=True)
+    filename = data.get('filename')
+    globals.current_file = filename
+    print("GLOBAL.CURRENT " + globals.current_file)
+    return '{"current_file": "' + globals.current_file + '"}'
+
 
 # Fetch Files
 @app.route('/update_files', methods=['GET'])
@@ -400,12 +404,10 @@ def save_configfile():
         return output
     
 
-
 if __name__ == "__main__":
 
     # Globals variables
     globals.initialize()
     
-
     # app.run(host='127.0.1',port=5000,debug=True,threaded=True)
     socketio.run(app, host='0.0.0.0', port=5000, debug=False, allow_unsafe_werkzeug=True)

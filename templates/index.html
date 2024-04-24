@@ -428,12 +428,13 @@
         socket.emit('connection', {
           data: 'Client connected!'
         });
-        socket.emit('plot_status', {
-        });
+        socket.emit('plot_status', {});
       });
 
       socket.on('plotter_status', function (data) {
-        console.log('WS_Plotter Status: ', data.status);
+
+        // jQuery(".selectedFilename").html(filename);
+
         if (data.status == "Plotting"){
           jQuery(".stopPlot").removeClass("uk-hidden");
         }
@@ -493,11 +494,9 @@
       // Lock file deletion on print start, unlock on stop
       socket.on('lock_edit', function (msg, cb) {
         if (msg.data == 'on') {
-          console.log("###lock edit ON")
           jQuery('.lock-edit').prop('disabled', true).addClass('uk-hidden');
           jQuery('.unlock-edit').prop('disabled', false).removeClass('uk-hidden');
         } else {
-          console.log("###lock edit OFF")
           jQuery('.lock-edit').prop('disabled', false).removeClass('uk-hidden');
           jQuery('.unlock-edit').prop('disabled', true).addClass('uk-hidden');
         }
@@ -521,7 +520,6 @@
       // Handle custom command check box
       jQuery(document).on('change', '#use_custom_command', function () {
         if (jQuery(this).prop('checked')) {
-          // console.log('checked');
           jQuery('#command_input.uk-input').removeAttr('disabled');
 
           jQuery('#vpype_check_boxes input[type="checkbox"]').each(function () {
@@ -537,7 +535,6 @@
 
 
         } else {
-          // console.log('unchecked');
           jQuery('#command_input.uk-input').attr('disabled', true);
           jQuery('#vpype_check_boxes input[type="checkbox"]').each(function () {
             jQuery(this)
@@ -595,7 +592,7 @@
       
       // Handle HPGL file preview
       jQuery(document).on('click', '.previewFile', function (e) {
-        console.log(" preview")
+        // console.log(" preview")
         e.preventDefault();
         previewFile(jQuery(this));
       });
