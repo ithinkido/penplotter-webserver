@@ -1,4 +1,3 @@
-
 # from convert_vpype import convert_file
 import os 
 import sys
@@ -29,6 +28,9 @@ app.config['SECRET_KEY'] = '#tiUJ791&jPYI9N7Kj'
 app.config['DEBUG'] = True
 
 socketio = SocketIO(app)
+
+import logging
+logging.getLogger("werkzeug").disabled = True
 
 # Buttons setup
 
@@ -109,6 +111,19 @@ def stop_button(channel):
 # GPIO.add_event_detect(27,GPIO.RISING,callback=start_button)
 # GPIO.add_event_detect(22,GPIO.RISING,callback=stop_button)
 
+
+
+
+
+
+
+# On connection
+@socketio.on('connection')
+def handle_connection(message):
+    print("Client connected")
+
+
+
 @app.errorhandler(413)
 def too_large(e):
     return "File is too large", 413
@@ -163,6 +178,21 @@ def html(filename):
             return file.read()
     except FileNotFoundError:
         return "File not found", 404
+    
+def plot_status():
+    print("P#### SocketIO lotter status = " + globals.plotter_status)
+    socketio.emit('plot_status', {'status': globals.plotter_status})    
+
+# WebSocket plot_status
+@socketio.on('ws_plot_status')
+def ws_plot_status():
+    plot_status()
+
+# Get Plot status
+@app.route('/plot_status', methods=['GET'])
+def get_plot_status():
+    plot_status()
+    return '{"plot_status": "' + globals.plotter_status + '"}'
 
 # Fetch Files
 @app.route('/update_files', methods=['GET'])
@@ -229,13 +259,22 @@ def start_plot():
 
         plot(file, port, baudrate, flowControl, tasmota, timelapse)
 
+        globals.plotter_status="Started_main"
+        socketio.emit('plotter_status', {'status': globals.plotter_status})
+        print("Plotter status = " + globals.plotter_status)
+
         return 'Plot started'
 
 # Stop the printing process
 @app.route('/stop_plot', methods=['GET', 'POST'])
 def stop_plot():
     if request.method == "GET":
-        globals.printing = False
+
+        globals.plotter_status = 'Stopped'
+        globals.plotting = False
+        socketio.emit('plotter_status', {'status': globals.plotter_status})
+        print("Plotter status = " + globals.plotter_status)
+
         PLOTTER_NAME = 'Plotter'
         if (config.has_option('plotter', 'name')):
             PLOTTER_NAME = config['plotter']['name']
@@ -345,12 +384,12 @@ def save_configfile():
     elif request.method == "GET":
 
         output = {
+            'tasmota_enable': config['tasmota']['tasmota_enable'],
             'telegram_token': config['telegram']['telegram_token'],
             'telegram_chatid': config['telegram']['telegram_chatid'],
-            'tasmota_enable': config['tasmota']['tasmota_enable'],
             'timelapse_enable': config['timelapse']['timelapse_enable'],
+            'timelapse_preview': config['timelapse']['timelapse_preview'],            
             'timelapse_auto_start': config['timelapse']['timelapse_auto_start'],
-            'timelapse_preview': config['timelapse']['timelapse_preview'],
             'tasmota_ip': config['tasmota']['tasmota_ip'],
             'plotter_name': config['plotter']['name'],
             'plotter_port': config['plotter']['port'],
@@ -360,15 +399,13 @@ def save_configfile():
         }
         return output
     
-# On connection
-@socketio.event
-def connection(message):
-    print('Client connected')
+
 
 if __name__ == "__main__":
 
     # Globals variables
     globals.initialize()
+    
 
     # app.run(host='127.0.1',port=5000,debug=True,threaded=True)
-    socketio.run(app, host='0.0.0.0', port=5000, debug=True, allow_unsafe_werkzeug=True)
+    socketio.run(app, host='0.0.0.0', port=5000, debug=False, allow_unsafe_werkzeug=True)
