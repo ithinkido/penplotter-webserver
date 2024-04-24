@@ -87,8 +87,10 @@ function plot_status() {
     .then(function (response) {
       if (response.status == 200) {
         var ps = response.data.plot_status;
+        var file = response.data.current_file
         if (ps == "Plotting"){
           jQuery(".stopPlot").removeClass("uk-hidden");
+          jQuery(".selectedFilename").html(file);
         }
         else {
           jQuery(".stopPlot").addClass("uk-hidden");
@@ -117,6 +119,20 @@ function selectFile(element) {
 
   // Update sidebar
   jQuery(".selectedFilename").html(filename);
+
+  axios
+  .post("/selected_file", { filename: filename })
+  .then(function (response) {
+    // handle success
+    if (response.status == 200) {
+      console.log("GLOBAL CUURENT FILE UPDATED TO : " +response.data.current_file)
+    }
+  })
+  .catch(function (error) {
+    notify(error, "danger");
+    console.error(error);
+  })
+  .then(function () { });
 }
 
 // Handle file deletion
@@ -142,7 +158,6 @@ function deleteFile(element) {
 
 function previewFile(element) {
   const filename = jQuery(element).data("filename");
-  console.log("getting file name " + filename);
 
   const imgElement = document.querySelector(".preview_canvas img");
   // clear any previous src
@@ -214,7 +229,7 @@ function convertFileModal(element) {
 // Handle HPGL preview conversion
 function HPGLpreviewModal(element) {
   const filename = jQuery(element).data("filename");
-  console.log(filename)
+  console.log("HPGL preview " + filename)
   jQuery("#previewFile").val(filename);
   UIkit.modal("#modal-HPGLpreview").show();
 }
