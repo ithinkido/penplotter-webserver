@@ -428,7 +428,6 @@
         socket.emit('connection', {
           data: 'Client connected!'
         });
-        socket.emit('plot_status', {});
       });
 
       socket.on('plotter_status', function (data) {

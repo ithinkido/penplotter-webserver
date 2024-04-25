@@ -173,26 +173,20 @@ def html(filename):
     except FileNotFoundError:
         return "File not found", 404
     
-def plot_status():
-    print("WS_Plotter status = " + globals.plotter_status +" , File = " + globals.current_file)
-    socketio.emit('plot_status', {'status': globals.plotter_status,'file': globals.current_file}) 
-
-# WebSocket plot_status
-@socketio.on('ws_plot_status')
-def ws_plot_status():
-    plot_status()
-
 # Get Plot status
 @app.route('/plot_status', methods=['GET'])
 def get_plot_status():
-    plot_status()
-    return '{"plot_status": "' + globals.plotter_status + '", "current_file": "' + globals.current_file + '"}'
+    data= {
+        "plot_status": globals.plotter_status,
+        "file": globals.current_file
+    }
+    return jsonify(data)
 
 # Set Selected File
 @app.route('/selected_file', methods=['POST'])
 def set_selected_file():
     data = request.get_json(silent=True)
-    filename = data.get('filename')
+    filename = data.get("filename")
     globals.current_file = filename
     print("GLOBAL.CURRENT " + globals.current_file)
     return '{"current_file": "' + globals.current_file + '"}'
