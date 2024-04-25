@@ -82,11 +82,12 @@ function updateFiles() {
 
 // Update plot status
 function plot_status() {
-  jQuery
+  axios
     .get("/plot_status")
     .then(function (response) {
       if (response.status == 200) {
         var ps = response.data.plot_status;
+        console.log("####PS#####" +ps)
         var file = response.data.file
         if (ps == "Plotting"){
           jQuery(".stopPlot").removeClass("uk-hidden");
