@@ -65,7 +65,7 @@ if [ ! -d "$dir" ] ; then
         libopenblas-dev \
         libgeos-c1v5 \
         libgeos-dev \
-        libatlas-base-dev \
+        libatlas-dev \
         python3-venv \
         libssl-dev \
         hp2xx \
