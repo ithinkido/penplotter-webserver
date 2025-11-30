@@ -150,7 +150,11 @@ echo "Installing apt packages"
     echo "Setup auto start for Web Plotter on boot"   
     sudo cp $dir/webplotter.service /etc/systemd/system/
     sudo systemctl daemon-reload
-    sudo systemctl enable webplotter > /dev/null
+    if sudo systemctl enable webplotter --quiet; then
+        echo "WebPlotter startup service enabled."
+    else
+        echo "Error: Failed to enable WebPlotter service!" >&2
+    fi
     sudo systemctl start webplotter
     echo ""
 
@@ -243,8 +247,25 @@ else
 
     # python3 -m pip install -q --upgrade -r $dir/requirements.txt
     python3 -m pip install --upgrade pip_system_certs >/dev/null
-    python3 -m pip install --upgrade -r $dir/requirements.txt > /dev/null
-    python3 -m pip install --upgrade vpype --prefer-binary vpype > /dev/null
+    while IFS= read -r package; do
+            echo "Updating $package" && \
+            if (python3 -m pip install --upgrade "$package" > /dev/null) & spinner; then
+                echo -e "\e[32m $package was updated successfully.\e[0m"
+            else
+                echo -e "\e[31m Failed to update $package.\e[0m"
+            fi
+            echo ""
+
+    done < "$dir/requirements.txt"
+
+    echo "Updating vpype"
+    if (python3 -m pip install vpype --prefer-binary vpype > /dev/null) & spinner; then
+        echo -e "\e[32m vpype was updated successfully.\e[0m"
+    else
+        echo -e "\e[31m Failed to update vpype.\e[0m"
+    fi
+    echo "" 
+
     sudo rm -rf /etc/systemd/system/webplotter.service
 
     current_user=$(whoami)
@@ -257,7 +278,11 @@ else
 
     sudo cp $dir/webplotter.service /etc/systemd/system/
     sudo systemctl daemon-reload
-    sudo systemctl enable webplotter
+    if sudo systemctl enable webplotter --quiet; then
+        echo "WebPlotter startup service enabled."
+    else
+        echo "Error: Failed to enable WebPlotter service!" >&2
+    fi
     sudo systemctl start webplotter
 
     sleep 2
