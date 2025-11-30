@@ -37,6 +37,7 @@ Currently, the following versions are supported:
 
 Pi-OS Bullseye - 32 and 64 bit  
 Pi-OS Bookworm - 32 and 64 bit  
+Pi-OS Trixie - 64 bit  
 
 From the home directory, run:
 
