@@ -58,24 +58,30 @@ echo -e "\e[32m Done.\e[0m"
 if [ ! -d "$dir" ] ; then
     echo ""
 
-    echo "Installing apt packages"
-    (sudo apt-get install -qq -y \
-        git \
-        python3-pip \
-        libopenblas-dev \
-        libgeos-c1v5 \
-        libgeos-dev \
-        python3-venv \
-        libssl-dev \
-        hp2xx \
-    > /dev/null) & spinner    
-    if [ $? -eq 0 ]; then
+echo "Installing apt packages"
+
+    LC_ALL=C LANG=C sudo apt-get install -qq -y \
+            git \
+            python3-pip \
+            libopenblas-dev \
+            libgeos-c1v5 \
+            libgeos-dev \
+            python3-venv \
+            libssl-dev \
+            hp2xx \
+            > /dev/null 2>&1 &
+    apt_pid=$!
+
+    spinner $apt_pid
+    wait $apt_pid
+    install_status=$?
+
+    if [ $install_status -eq 0 ]; then
         echo -e "\e[32m Packages installed successfully.\e[0m"
     else
-        echo -e "\e[1;31m Error: Failed to install packages. Exiting\e[0m">&2
+        echo -e "\e[1;31m Error: Failed to install packages. Exiting\e[0m" >&2
         exit 1
     fi
-    echo ""
 
     echo "Downloading Web Plotter for $BRANCH from Github"
     if git ls-remote --exit-code --heads $git "$BRANCH" > /dev/null; then
