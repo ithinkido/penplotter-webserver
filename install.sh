@@ -82,6 +82,7 @@ echo "Installing apt packages"
         echo -e "\e[1;31m Error: Failed to install packages. Exiting\e[0m" >&2
         exit 1
     fi
+    echo ""
 
     echo "Downloading Web Plotter for $BRANCH from Github"
     if git ls-remote --exit-code --heads $git "$BRANCH" > /dev/null; then
